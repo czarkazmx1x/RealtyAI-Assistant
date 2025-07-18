@@ -1,0 +1,238 @@
+// Railway deployment entry point
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { PrismaClient } from '@prisma/client';
+
+// Import routes
+import authRoutes from './routes/auth.js';
+import listingRoutes from './routes/listings.js';
+import leadsRoutes from './routes/leads.js';
+import tasksRoutes from './routes/tasks.js';
+import postsRoutes from './routes/posts.js';
+import activityLogsRoutes from './routes/activityLogs.js';
+import integrationsRoutes from './routes/integrations.js';
+
+// Set up __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables
+dotenv.config();
+
+// Initialize Prisma
+const prisma = new PrismaClient();
+
+// Initialize Express
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors({
+  origin: '*', // For development; restrict in production
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+app.use(express.json());
+
+// Static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/listings', listingRoutes);
+app.use('/api/leads', leadsRoutes);
+app.use('/api/tasks', tasksRoutes);
+app.use('/api/posts', postsRoutes);
+app.use('/api/activitylogs', activityLogsRoutes);
+app.use('/api/integrations', integrationsRoutes);
+
+// Health check endpoint for Railway
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Real Estate Backend is running!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    port: process.env.PORT || 3000,
+    hostname: require('os').hostname(),
+    nodeVersion: process.version,
+    uptime: process.uptime() + ' seconds',
+    prismaHealth: prisma ? 'Connected' : 'Not Connected'
+  });
+});
+
+// Property description generator endpoint
+app.post('/api/property-description', (req, res) => {
+  try {
+    const { propertyFeatures, tone } = req.body;
+    
+    if (!propertyFeatures || propertyFeatures.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: propertyFeatures'
+      });
+    }
+
+    const selectedTone = tone || 'Professional';
+    
+    const templates = {
+      'Luxury': 'Indulge in the epitome of sophistication with this exquisite property! ' + propertyFeatures + ' This remarkable residence epitomizes luxury living at its finest. Schedule your private viewing today to experience unparalleled elegance.',
+      'Casual': 'Check out this awesome property! ' + propertyFeatures + ' This place has everything you need and more! Give us a call to set up a viewing - you\'re going to love it!',
+      'Professional': 'This exceptional property offers ' + propertyFeatures + ' This well-appointed residence provides an excellent opportunity for discerning buyers. Contact our team today to arrange a viewing.',
+      'Excited': 'WOW! You absolutely MUST see this incredible property! ' + propertyFeatures + ' This is THE property you\'ve been waiting for! Don\'t let this AMAZING opportunity slip away - call NOW!'
+    };
+
+    const description = templates[selectedTone] || templates['Professional'];
+
+    res.json({
+      success: true,
+      description: description,
+      metadata: {
+        tone: selectedTone,
+        timestamp: new Date().toISOString(),
+        generator: 'Template-based (Railway)',
+        word_count: description.split(/\s+/).length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error generating property description:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Database initialization endpoint (for admin use only)
+app.post('/api/init-database', async (req, res) => {
+  try {
+    // Read the schema.sql file
+    const fs = require('fs');
+    const path = require('path');
+    const { Pool } = require('pg');
+    
+    const sqlPath = path.join(__dirname, 'schema.sql');
+    let sql;
+    
+    try {
+      sql = fs.readFileSync(sqlPath, 'utf8');
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        error: `Could not read schema file: ${err.message}`
+      });
+    }
+    
+    // Connect to the database
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    
+    // Execute the SQL
+    try {
+      await pool.query(sql);
+      return res.json({
+        success: true,
+        message: 'Database schema initialized successfully'
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        error: `Database initialization failed: ${err.message}`
+      });
+    } finally {
+      await pool.end();
+    }
+  } catch (error) {
+    console.error('Error initializing database:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    service: 'Real Estate Backend with Property Description Generator',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      propertyDescription: '/api/property-description',
+      initDatabase: '/api/init-database', 
+      auth: '/api/auth/*',
+      listings: '/api/listings/*',
+      leads: '/api/leads/*',
+      tasks: '/api/tasks/*',
+      posts: '/api/posts/*',
+      activityLogs: '/api/activitylogs/*',
+      integrations: '/api/integrations/*'
+    },
+    version: process.env.npm_package_version || '1.0.0',
+    nodeEnv: process.env.NODE_ENV || 'development',
+    port: process.env.PORT || 3000,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Global error handler caught:', err);
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+      status: err.status || 500,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    }
+  });
+});
+
+// Handle 404 errors
+app.use((req, res) => {
+  res.status(404).json({
+    error: {
+      message: `Route not found: ${req.method} ${req.originalUrl}`,
+      status: 404
+    }
+  });
+});
+
+// Database connection and server start
+async function startServer() {
+  try {
+    // Test database connection
+    await prisma.$connect();
+    console.log('Successfully connected to database');
+    
+    // Start the Express server
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Server is running on host 0.0.0.0 and port ${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
+
+// Handle process termination
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  console.log('Database connection closed');
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  await prisma.$disconnect();
+  console.log('Database connection closed');
+  process.exit(0);
+});

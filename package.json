@@ -1,0 +1,41 @@
+{
+  "name": "real_estate_railway_deployment",
+  "version": "1.0.0",
+  "description": "Real Estate Platform for Railway Deployment",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "prisma:generate": "echo Skipping prisma generate",
+    "prisma:migrate": "echo Skipping prisma migrate",
+    "postinstall": "echo Skipping postinstall"
+  },
+  "keywords": [
+    "real-estate",
+    "railway",
+    "deployment"
+  ],
+  "author": "Matt Baker",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^1.41.0",
+    "cors": "^2.8.5",
+    "csv-parse": "^6.0.0",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "fs-extra": "^11.2.0",
+    "googleapis": "^152.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.1",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.104.0",
+    "pg": "^8.11.3",
+    "prisma": "^6.11.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "real-estate-nextdoor": {
+      "command": "node",
+      "args": ["workflow-orchestrator.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+} 

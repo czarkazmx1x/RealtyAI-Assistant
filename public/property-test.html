@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 Property Description Generator - Railway</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1em;
+        }
+        textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        .button-group {
+            text-align: center;
+            margin: 40px 0;
+        }
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+        }
+        .success {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+            color: white;
+        }
+        .loading {
+            background: linear-gradient(135deg, #74c0fc, #339af0);
+            color: white;
+        }
+        .output {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            min-height: 150px;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .metadata {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Property Description Generator</h1>
+        <p class="subtitle">Powered by Railway • Real Estate Backend API</p>
+        
+        <div class="form-group">
+            <label for="propertyFeatures">🏡 Property Features:</label>
+            <textarea id="propertyFeatures" placeholder="Describe your property features...">Beautiful 3-bedroom house with modern kitchen, spacious living areas, and large backyard perfect for entertaining.</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="tone">🎨 Writing Tone:</label>
+            <select id="tone">
+                <option value="Professional">💼 Professional</option>
+                <option value="Luxury">✨ Luxury</option>
+                <option value="Casual">😊 Casual</option>
+                <option value="Excited">🚀 Excited</option>
+            </select>
+        </div>
+        
+        <div class="button-group">
+            <button id="generateBtn" onclick="generateDescription()">✨ Generate Description</button>
+            <button onclick="clearResults()">🧹 Clear</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div>
+            <h3>📄 Generated Description:</h3>
+            <div id="output" class="output">Click "Generate Description" to create your property listing...</div>
+            <div id="metadata" class="metadata" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let isGenerating = false;
+
+        function updateStatus(message, type = 'loading') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function hideStatus() {
+            document.getElementById('status').style.display = 'none';
+        }
+
+        async function generateDescription() {
+            if (isGenerating) return;
+
+            const propertyFeatures = document.getElementById('propertyFeatures').value.trim();
+            const tone = document.getElementById('tone').value;
+            
+            if (!propertyFeatures) {
+                updateStatus('❌ Please enter property features first', 'error');
+                return;
+            }
+
+            isGenerating = true;
+            const generateBtn = document.getElementById('generateBtn');
+            const originalText = generateBtn.textContent;
+            generateBtn.textContent = '⏳ Generating...';
+            generateBtn.disabled = true;
+
+            const output = document.getElementById('output');
+            const metadata = document.getElementById('metadata');
+            
+            try {
+                updateStatus('🚀 Generating your property description...', 'loading');
+                output.textContent = 'Creating compelling description...';
+                
+                // Use Railway API endpoint
+                const response = await fetch('/api/property-description', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        propertyFeatures,
+                        tone
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    output.textContent = result.description;
+                    updateStatus('✅ Description generated successfully!', 'success');
+                    
+                    // Show metadata
+                    metadata.innerHTML = `
+                        <strong>📊 Details:</strong><br>
+                        <strong>Tone:</strong> ${result.metadata.tone}<br>
+                        <strong>Words:</strong> ${result.metadata.word_count}<br>
+                        <strong>Generator:</strong> ${result.metadata.generator}<br>
+                        <strong>Generated:</strong> ${new Date(result.metadata.timestamp).toLocaleString()}
+                    `;
+                    metadata.style.display = 'block';
+                    
+                    setTimeout(hideStatus, 3000);
+                } else {
+                    throw new Error(result.error || 'Unknown error occurred');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                output.textContent = `❌ Error generating description: ${error.message}`;
+                updateStatus(`❌ Generation failed: ${error.message}`, 'error');
+                metadata.style.display = 'none';
+            } finally {
+                isGenerating = false;
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('output').textContent = 'Click "Generate Description" to create your property listing...';
+            document.getElementById('metadata').style.display = 'none';
+            hideStatus();
+        }
+
+        // Auto-focus on the textarea
+        window.addEventListener('load', () => {
+            document.getElementById('propertyFeatures').focus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<<<<<<< HEAD
+version: "3.8"
+
+services:
+  db:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-realestate}
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # Expose on the standard port; 
+    # if you want to map to a different host port, do "5433:5432"
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # Container listens on 5000; host mapping to 5001 is optional
+    ports:
+      - "5001:5000"
+    environment:
+      NODE_ENV: development
+      # Inside Docker network, 'db:5432' is correct
+      DATABASE_URL: postgresql://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-realestate}
+      # Tell Prisma where to apply migrations in dev
+      # (override with .env or your railway connect tunnel later)
+    depends_on:
+      - db
+    volumes:
+      # Mount your code
+      - ./backend:/usr/src/app
+      # Keep node_modules persistent in a named volume
+      - backend_node_modules:/usr/src/app/node_modules
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    environment:
+      # Use the container hostname and container port (5000), not the host port (5001)
+      REACT_APP_BACKEND_URL: http://backend:5000
+
+  n8n:
+    image: n8nio/n8n
+    restart: unless-stopped
+    ports:
+      - "5679:5678"
+    volumes:
+      # Make sure this volume exists (Railway uses its own naming; locally you can choose anything)
+      - n8n_data:/home/node/.n8n
+    environment:
+      DB_TYPE: postgres
+      DB_POSTGRES_HOST: db
+      DB_POSTGRES_PORT: 5432
+      DB_POSTGRES_DATABASE: ${DB_NAME:-realestate}
+      DB_POSTGRES_USER: ${DB_USER:-user}
+      DB_POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: "n8nuser"
+      N8N_BASIC_AUTH_PASSWORD: "n8npassword"
+      # If you're accessing n8n via http://localhost:5679, set:
+      WEBHOOK_URL: "http://localhost:5679/"
+      GENERIC_TIMEZONE: "America/New_York"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+  backend_node_modules:
+  n8n_data:
+=======
+version: '3.8'
+
+services:
+  real_estate_backend:
+    build:
+      context: ./real_estate_backend
+    container_name: real_estate_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DB_USER=postgres
+      - DB_HOST=db
+      - DB_DATABASE=realtyadmin_db
+      - DB_PASSWORD=password
+      - DB_PORT=5432
+      - NODE_ENV=development
+    depends_on:
+      - db
+    networks:
+      - app-network
+    restart: always
+
+  realtyadmin:
+    build: 
+      context: ./realtyadmin
+      dockerfile: Dockerfile
+    container_name: realtyadmin
+    ports:
+      - "3002:3000" # Expose on port 3002
+    environment:
+      - VITE_API_URL=/api
+      - NODE_ENV=development
+    depends_on:
+      - real_estate_backend
+    networks:
+      - app-network
+    restart: always
+
+  db:
+    image: postgres:15
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: realtyadmin_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./real_estate_backend/database.sql:/docker-entrypoint-initdb.d/database.sql
+    networks:
+      - app-network
+
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USERNAME}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://${N8N_HOST}:5678/
+      - GENERIC_TIMEZONE=America/New_York # Or your preferred timezone
+    networks:
+      - app-network
+
+volumes:
+  pgdata:
+  n8n_data:
+
+networks:
+  app-network:
+>>>>>>> origin/main

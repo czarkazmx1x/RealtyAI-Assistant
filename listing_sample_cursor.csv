@@ -1,0 +1,3 @@
+Generate a warm, engaging Nextdoor real estate post under 100 words using this CSV data:
+Address,Bedrooms,Bathrooms,Square Footage,Lot Size (acres),Features,Price,Neighborhood,Nearby
+"123 Lakeview Drive, Atlanta, GA",3,2,1850,0.25,"Open-concept, modern kitchen, large backyard, hardwood floors, lake view, updated appliances",495000,Lakewood Heights,"Parks, Beltline, top coffee shops, great schools"

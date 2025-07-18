@@ -1,0 +1,17 @@
+<<<<<<< HEAD
+# nixpacks.toml for Railway deployment
+
+# Specify the language environment to use
+providers = ["node@18"]
+
+# No build command needed - Railway will use Dockerfile
+=======
+[phases.setup]
+nixPkgs = ["nodejs_18"]
+
+[start]
+cmd = "node index.js"
+
+[variables]
+NODE_ENV = "production"
+>>>>>>> origin/main

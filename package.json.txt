@@ -1,0 +1,26 @@
+{
+  "name": "real-estate-cursor-mvp",
+  "version": "1.0.0",
+  "description": "Real estate automation and property description generator",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "real-estate",
+    "automation",
+    "property-descriptions"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

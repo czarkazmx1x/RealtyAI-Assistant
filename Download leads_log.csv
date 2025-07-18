@@ -1,0 +1,3 @@
+Timestamp,Name,Email,Phone,Message,Source,Post_URL,Property_Address,Status,Agent,Urgency,Follow_up_Date
+2024-07-11T03:35:00.000Z,"John Smith","john.smith@email.com","555-123-4567","Interested in the Lakeview Drive property. Can you send more details?","Nextdoor","https://nextdoor.com/p/example-post-1","123 Lakeview Drive, Atlanta, GA",New,Matt Baker,Normal,TBD
+2024-07-11T03:40:00.000Z,"Sarah Johnson","sarah.j@email.com","555-987-6543","Love the Oak Street home! When can we schedule a viewing?","Nextdoor","https://nextdoor.com/p/example-post-2","456 Oak Street, Decatur, GA",New,Matt Baker,High,2024-07-12 

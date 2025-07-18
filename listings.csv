@@ -1,0 +1,6 @@
+﻿Address,Bedrooms,Bathrooms,Square_Footage,Lot_Size_(acres),Features,Price,Neighborhood,Nearby,Image_Paths
+"123 Lakeview Drive, Atlanta, GA",3,2,1850,0.25,"Open-concept modern kitchen large backyard hardwood floors lake view updated appliances",495000,"Lakewood Heights","Parks Beltline top coffee shops great schools","images/lakeview_1.jpg;images/lakeview_2.jpg"
+"456 Oak Street, Decatur, GA",4,3,2200,0.3,"Spacious master suite finished basement gourmet kitchen screened porch mature trees",575000,"Decatur","Downtown Decatur MARTA restaurants shopping","images/oak_1.jpg;images/oak_2.jpg;images/oak_3.jpg"
+"789 Pine Avenue, Marietta, GA",3,2.5,1950,0.2,"Updated bathrooms granite countertops fenced yard garage quiet street",425000,"East Cobb","Schools parks shopping center easy highway access","images/pine_1.jpg"
+"321 Elm Court, Roswell, GA",5,4,2800,0.4,"Large family room formal dining bonus room pool extensive landscaping",725000,"Roswell","Historic downtown Chattahoochee River trails restaurants","images/elm_1.jpg;images/elm_2.jpg"
+"654 Maple Lane, Alpharetta, GA",4,3.5,2400,0.35,"Chef kitchen home office finished basement deck cul-de-sac location",650000,"Windward","Avalon North Point Mall GA-400 top schools","images/maple_1.jpg;images/maple_2.jpg;images/maple_3.jpg"
